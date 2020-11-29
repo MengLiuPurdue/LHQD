@@ -6,9 +6,9 @@ code for LHQD project, see our arXiv paper
 	  journal    = {arXiv},
 	  title      = {Strongly Local Hypergraph Diffusions for Clustering and Semi-supervised Learning},
 	  year       = {2020},
-	  pages      = {},
+	  pages      = {2011.07752},
 	  volume     = {cs.SI},
-	  arxiv      = {},
+	  arxiv      = {http://arxiv.org/abs/2011.07752},
 	  mysoftware = {https://github.com/MengLiuPurdue/LHQD},
 	}
 
