@@ -44,19 +44,11 @@ Node metadata:
 * City, State, and Zipcode
 * {0,1} vector of whether node is in Las Vegas area. 7403 nodes are in this cluster.
 
-
-### Other julia files
-
-For generating the clique expansion and star expansion (which you can run once and then save the output from)
-
-1. **yelp_expansions.jl**: Produces star and clique expansion for hypergraph
-2. **spectral_vegas**: produces xy coordinates for visualizing restaurants in las vegas, using a eigenvectors of the Laplacian of a nearest neighbors matrix on latitude-longitude data
-
 ### Running Local Hypergraph Experiments
 
-Experiments for all algorithms are run local_clustering_yelp.jl
+Experiments for all algorithms are run `local_clustering_yelp.jl`
 
-To generate plots from the output, run plot_lasvegas_results.jl
+To generate plots from the output, run `plot_lasvegas_results.jl`
 
 #### Experimental Setup
 

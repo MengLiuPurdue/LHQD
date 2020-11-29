@@ -23,7 +23,7 @@ to run the code on a small hypergraph, run
     good = findall(x->x > 0, order)
     H = H[good,:]
     order = vec(round.(Int64,sum(H,dims=2)))
-	G = LH.graph(H,1.0) # a hypergraph object with delta=1.0 in its cut function
+    G = LH.graph(H,1.0) # a hypergraph object with delta=1.0 in its cut function
     q = 2.0
     L = LH.loss_type(q) # the loss-type, this is a 2-norm)
     kappa = 0.01 # value of kappa (sparsity regularization)
@@ -32,6 +32,10 @@ to run the code on a small hypergraph, run
     S = [1] $ seed set
     x,r,iter = LH.lh_diffusion(G,S,gamma,kappa,rho,L,max_iters=10000)
     cond,cluster = hyper_sweepcut(G.H,x,G.deg,G.delta,0.0,G.order)
+
+Datasets
+-----------
+The instructions on obtaining the Yelp dataset is included in the `yelp_local_algorithms` folder. We refer to reference [33] in our manuscript for instructions on obtaining the Amazon and Stack Overflow datasets. The Amazon and Stack Overflow datasets must be placed into `hypergraphs` folder.
 
 
 Experiments

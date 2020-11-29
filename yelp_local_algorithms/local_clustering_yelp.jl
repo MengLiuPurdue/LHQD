@@ -1,16 +1,24 @@
+cd("../")
 include("common.jl")
 include("local-hyper.jl")
+include("qdsfm-ppr.jl")
+include("hgcrd.jl")
 include("PageRank.jl")
 include("hyperlocal_code/HyperLocal.jl")
-include("evaluation.jl")
+cd("yelp_local_algorithms")
 
 using MAT
 using SparseArrays
-M = matread("yelp_local_algorithms/yelp_restaurant_H.mat")
+M = matread("yelp_restaurant_H.mat")
 H = M["H"]
 T = M["T"]
 Ht = sparse(H')
 order = round.(Int64,vec(sum(H,dims=2)))
+
+dh = zeros(Int,size(H,2))
+for i=1:size(H,2)
+  dh[i] = sum(order[H.rowval[H.colptr[i]:H.colptr[i+1]-1]])
+end
 d = vec(sum(H,dims=1))
 volA = sum(d)
 m,n = size(H)
@@ -18,7 +26,6 @@ m,n = size(H)
 condT, volt, cutT = tl_cond(H,T,d,1.0,volA,order)
 
 ## Form a clique expansion
-
 @time A = WeightedCliqueExpansion(H,order)
 dA = vec(sum(A,dims=1))
 #matwrite("yelp_restaurant_clique_exp.mat",Dict("A"=>A,"dA"=>dA))
@@ -26,7 +33,7 @@ dA = vec(sum(A,dims=1))
 ## Parameters
 
 # LH parameters
-ratio = 0.0014
+ratio = 0.01
 max_iters = 1000000
 x_eps=1.0e-8
 aux_eps=1.0e-8
@@ -60,6 +67,8 @@ flowref_stats = zeros(trials,5)
 star1_stats = zeros(trials,5)
 star2_stats = zeros(trials,5)
 star3_stats = zeros(trials,5)
+qdsfmpr_stats = zeros(trials,5)
+hgcrd_stats = zeros(trials,5)
 
 lh_sets = spzeros(n,trials)
 flow_sets = spzeros(n,trials)
@@ -70,14 +79,14 @@ pr3_sets = spzeros(n,trials)
 star1_sets = spzeros(n,trials)
 star2_sets = spzeros(n,trials)
 star3_sets = spzeros(n,trials)
+hgcrd_sets = spzeros(n,trials)
+
+
+
 
 seednum = 10
 
-ratio = 0.0014
-gamma = 0.05
-kappa_lh = 0.00005
-ret = eval_lh(G,T,1,aux_eps=1.0e-16,x_eps=1.0e-16,kappa=kappa_lh,q=2.0,gamma=gamma,ratio=ratio,max_iters=10000)
-@show ret[end-1],ret[end]
+
 
 ## Generate Seed sets
 # seed_sets = zeros(trials,seednum)
@@ -90,7 +99,7 @@ ret = eval_lh(G,T,1,aux_eps=1.0e-16,x_eps=1.0e-16,kappa=kappa_lh,q=2.0,gamma=gam
 # end
 # matwrite("output/Vegas_Seeds.mat", Dict("seed_sets"=>seed_sets))
 ## load previously generate seeds
-Sd = matread("yelp_local_algorithms/output/Vegas_Seeds.mat")
+Sd = matread("output/Vegas_Seeds.mat")
 seed_sets = round.(Int64,Sd["seed_sets"])
 
 ## Run PageRank on star expansion
@@ -169,13 +178,11 @@ for i = 1:trials
 
     seeds = seed_sets[i,:]
     L = LH.loss_type(q,delta)
-    gamma = 0.01
-    kappa_lh = 0.001
-    rho=0.5
     tic = time()
     x,r,iter = LH.lh_diffusion(G,seeds,gamma,kappa_lh,rho,L,max_iters=max_iters,x_eps=x_eps,aux_eps=aux_eps)
     cond,cluster = hyper_sweepcut(G.H,x,G.deg,G.delta,0.0,G.order)
     toc = time()-tic
+    println("nnz=$(sum( x.> 1e-9))")
     pr, re, f1_lh = PRF(T,cluster)
     condS, volS, cutS = tl_cond(H,cluster,d,delta,volA,order)
     lh_stats[i,:] = [pr, re, f1_lh, toc, condS]
@@ -219,10 +226,58 @@ for i = 1:trials
     flowref_stats[i,:] = [pr_flow, re_flow, f1_flow,hl_time,condHL]
     flowref_sets[S,i] .= 1
     @show f1_flow #f1_flow
-
 end
 
 ## Save it
 # matwrite("output/Flow_Vegas_Detect.mat",Dict("flowref_stats"=>flowref_stats,
 # "flowref_sets"=>flowref_sets, "flow_stats"=>flow_stats,
 # "flow_sets"=>flow_sets,"delta"=>delta))
+
+
+## Run QDSFM-PPR
+for i = 1:trials
+    # Random seed set
+    seeds = round.(Int64,seed_sets[i,:])
+    s = time()
+    x = QDSFMPageRank.qdsfmpr_ppr_euler(G.Ht , seeds, 0.01, 100, 0.1)
+    cond,cluster = hyper_sweepcut(G.H,x./G.deg,G.deg,G.delta,0.0,G.order)
+    qpr_time = time()-s
+    println("cluster len=$(length(cluster)) qpr_time=$qpr_time nnz=$(sum( x.> 1e-9))")
+    pr, re, f1_qpr = PRF(T,cluster)
+    condS, volS, cutS = tl_cond(G.H,cluster,d,delta,volA,order)
+    qdsfmpr_stats[i,:] = [pr, re, f1_qpr, 0, condS]
+    qdsfmpr_sets[cluster,i] .= 1
+
+    println("$f1_qpr ($pr, $re)")
+end
+## Save it
+matwrite("output/QPR_Vegas_Detect.mat",Dict("qdsfmpr_stats"=>qdsfmpr_stats,
+"qdsfmpr_sets"=>qdsfmpr_sets))
+
+## Run HGCRD
+for i = 1:trials
+    # Random seed set
+    seeds = round.(Int64,seed_sets[i,:])
+
+    #val_hgcrd(G,T,seed;
+    # ratio=0.01,)
+    #s1 = time()
+
+    U=3
+    h=2
+    w=2
+    iterations=15
+    alpha=1
+    tau=0.1
+    cond, cluster = HGCRD.capacityReleasingDiffusion(G.H,Ht,G.order,seeds,U,h,w,iterations,alpha,tau,volA,G.deg, dh)
+    println("cluster len=$(length(cluster)) cond=$(cond)")
+    pr, re, f1_hgcrd = PRF(T,cluster)
+    condS, volS, cutS = tl_cond(G.H,cluster,d,delta,volA,order)
+    hgcrd_stats[i,:] = [pr, re, f1_hgcrd, 0, condS]
+    hgcrd_sets[cluster,i] .= 1
+
+    println("$f1_hgcrd ($pr, $re)")
+end
+## Save it
+matwrite("output/HGCRD_Vegas_Detect.mat",Dict("qdsfmpr_stats"=>qdsfmpr_stats,
+"qdsfmpr_sets"=>qdsfmpr_sets))

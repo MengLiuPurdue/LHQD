@@ -33,13 +33,15 @@ struct TwoNormLoss{T} <: EdgeLoss{T}
 end
 
 """ This function isn't type stable, so don't use it except it outer codes. """
-function loss_type(q::T; delta = 0.0) where T
+function loss_type(q::T, delta::T) where T
     if q == 2.0
         return TwoNormLoss{T}()
     else
         return QHuberLoss{T}(q, delta)
     end
 end
+
+loss_type(q) = loss_type(q,0.0)
 
 minval(f, L::QHuberLoss) = f^(1/(L.q-1))
 minval(f, L::TwoNormLoss) = sqrt(f)
