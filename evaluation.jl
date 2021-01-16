@@ -16,7 +16,7 @@ G:        HyperGraphAndDegrees
 function eval_lh(G,T,seed;ratio=0.01,delta=0.0,max_iters=1000000,
         x_eps=1.0e-8,aux_eps=1.0e-8,kappa=0.0025,gamma=0.1,rho=0.5,q=2.0)
     nT = length(T)
-    seednum = max(round(Int64,ratio*nT),1)
+    seednum = max(round(Int64,ratio*nT),5)
     Random.seed!(seed)
     p = randperm(nT)
     seedset = T[p[1:seednum]]
@@ -32,7 +32,7 @@ end
 
 function eval_flow(G,T,seed;ratio=0.01,epsilon=0.1,delta=1.0,expand_num=2000)
     nT = length(T)
-    seednum = max(round(Int64,ratio*nT),1)
+    seednum = max(round(Int64,ratio*nT),5)
     Random.seed!(seed)
     p = randperm(nT)
     seedset = T[p[1:seednum]]
@@ -59,7 +59,7 @@ function eval_acl(G,T,seed;ratio=0.01,kappa=0.00025,gamma=0.1,
         acl_delta = G.delta
     end
     nT = length(T)
-    seednum = max(round(Int64,ratio*nT),1)
+    seednum = max(round(Int64,ratio*nT),5)
     Random.seed!(seed)
     p = randperm(nT)
     seedset = T[p[1:seednum]]
@@ -80,7 +80,7 @@ function eval_acl_implicit(G,T,seed;ratio=0.01,kappa=0.00025,gamma=0.1,acl_delta
         acl_delta = G.delta
     end
     nT = length(T)
-    seednum = max(round(Int64,ratio*nT),1)
+    seednum = max(round(Int64,ratio*nT),5)
     Random.seed!(seed)
     p = randperm(nT)
     seedset = T[p[1:seednum]]
@@ -114,7 +114,7 @@ function eval_acl_clique(G,T,seed;ratio=0.01,kappa=0.00025,gamma=0.1,
         acl_delta = G.delta
     end
     nT = length(T)
-    seednum = max(round(Int64,ratio*nT),1)
+    seednum = max(round(Int64,ratio*nT),5)
     Random.seed!(seed)
     p = randperm(nT)
     seedset = T[p[1:seednum]]
@@ -134,7 +134,7 @@ function eval_slq(G,T,seed;ratio=0.01,kappa=0.00025,gamma=0.1,q=1.4,delta=0.0,rh
         Ga,deg = hypergraph_to_bipartite(G)
     end
     nT = length(T)
-    seednum = max(round(Int64,ratio*nT),1)
+    seednum = max(round(Int64,ratio*nT),5)
     Random.seed!(seed)
     p = randperm(nT)
     seedset = T[p[1:seednum]]
@@ -155,7 +155,7 @@ function eval_slq_clique(G,T,seed;ratio=0.01,kappa=0.00025,gamma=0.1,q=1.4,delta
         Ga,deg = CliqueExpansion(G)
     end
     nT = length(T)
-    seednum = max(round(Int64,ratio*nT),1)
+    seednum = max(round(Int64,ratio*nT),5)
     Random.seed!(seed)
     p = randperm(nT)
     seedset = T[p[1:seednum]]
@@ -175,7 +175,7 @@ function eval_slq_and_flow(G,T,seed;ratio=0.01,kappa=0.00025,gamma=0.1,q=1.4,del
         Ga,deg = hypergraph_to_bipartite(G)
     end
     nT = length(T)
-    seednum = max(round(Int64,ratio*nT),1)
+    seednum = max(round(Int64,ratio*nT),5)
     Random.seed!(seed)
     p = randperm(nT)
     seedset = T[p[1:seednum]]
@@ -202,7 +202,7 @@ function eval_acl_and_flow(G,T,seed;ratio=0.01,kappa=0.00025,gamma=0.1,flow_eps=
         acl_delta = G.delta
     end
     nT = length(T)
-    seednum = max(round(Int64,ratio*nT),1)
+    seednum = max(round(Int64,ratio*nT),5)
     Random.seed!(seed)
     p = randperm(nT)
     seedset = T[p[1:seednum]]
@@ -223,7 +223,7 @@ end
 function eval_lh_and_flow(G,T,seed;ratio=0.01,flow_delta=1.0,max_iters=1000000,
     x_eps=1.0e-8,aux_eps=1.0e-8,kappa=0.00025,gamma=0.1,rho=0.5,flow_eps=0.1,q=2.0)
     nT = length(T)
-    seednum = max(round(Int64,ratio*nT),1)
+    seednum = max(round(Int64,ratio*nT),5)
     Random.seed!(seed)
     p = randperm(nT)
     seedset = T[p[1:seednum]]
@@ -259,7 +259,7 @@ end
 
 function eval_BN_and_flow(G,T,seed;ratio=0.01,flow_eps=0.1)
     nT = length(T)
-    seednum = max(round(Int64,ratio*nT),1)
+    seednum = max(round(Int64,ratio*nT),5)
     Random.seed!(seed)
     p = randperm(nT)
     seedset = T[p[1:seednum]]
@@ -279,7 +279,7 @@ end
 
 function eval_TN(G,T,seed;ratio=0.01)
     nT = length(T)
-    seednum = max(round(Int64,ratio*nT),1)
+    seednum = max(round(Int64,ratio*nT),5)
     Random.seed!(seed)
     p = randperm(nT)
     seedset = T[p[1:seednum]]
@@ -296,7 +296,7 @@ end
 
 function eval_TN_and_flow(G,T,seed;ratio=0.01,flow_eps=0.1)
     nT = length(T)
-    seednum = max(round(Int64,ratio*nT),1)
+    seednum = max(round(Int64,ratio*nT),5)
     Random.seed!(seed)
     p = randperm(nT)
     seedset = T[p[1:seednum]]
@@ -316,7 +316,7 @@ end
 
 function eval_hgcrd(G,T,seed;ratio=0.01,U=3,h=3,w=2,iterations=10,alpha=1,tau=0.5)
     nT = length(T)
-    seednum = max(round(Int64,ratio*nT),1)
+    seednum = max(round(Int64,ratio*nT),5)
     Random.seed!(seed)
     p = randperm(nT)
     seedset = T[p[1:seednum]]
@@ -337,7 +337,7 @@ end
 
 function eval_global(G,T,seed;ratio=0.01,beta=0.05,niter=2000,h=0.01)
     nT = length(T)
-    seednum = max(round(Int64,ratio*nT),1)
+    seednum = max(round(Int64,ratio*nT),5)
     Random.seed!(seed)
     p = randperm(nT)
     seedset = T[p[1:seednum]]

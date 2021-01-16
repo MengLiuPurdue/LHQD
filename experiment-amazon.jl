@@ -14,7 +14,7 @@ include("local-hyper.jl")
 using PyCall
 @pyimport collections as py_collections
 H,clusters = read_dataset("amazon")
-G = LH.graph(H,10.0)
+G = LH.graph(H,1.0)
 kappa = 0.00025
 ratio = 0.01
 flow_eps = 0.05
